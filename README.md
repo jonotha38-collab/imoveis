@@ -26,12 +26,25 @@ privado).
 3. Não precisa mudar nenhuma configuração de build — a Vercel detecta
    Next.js automaticamente.
 
-### 3. Criar o banco de dados (Vercel KV)
-1. Dentro do projeto na Vercel, vá em **Storage → Create Database → KV**.
-2. Depois de criado, clique em **Connect Project** e conecte ao projeto
-   que você acabou de importar.
-3. Isso preenche automaticamente as variáveis `KV_REST_API_URL` e
-   `KV_REST_API_TOKEN` — você não precisa copiar nada manualmente.
+### 3. Criar o banco de dados (Upstash Redis, via Marketplace)
+O antigo "Vercel KV" foi descontinuado. O caminho atual é:
+
+1. Dentro do projeto na Vercel, vá em **Storage** (ou **Integrations → Browse Marketplace**).
+2. Procure por **Upstash** (ou **Redis**) e clique em **Add Integration** / **Install**.
+3. Escolha criar um banco novo (deixe a Vercel gerenciar a conta Upstash pra você, é a opção mais simples).
+4. Conecte esse banco ao projeto `imoveis`.
+5. Isso preenche automaticamente as variáveis `KV_REST_API_URL` e
+   `KV_REST_API_TOKEN` no seu projeto — você não precisa copiar nada manualmente.
+
+### 3.1 Criar o armazenamento de arquivos (Vercel Blob)
+O PDF do book é enviado direto para o Vercel Blob (não passa pela nossa
+função serverless), para evitar o limite de 4.5MB por requisição da Vercel.
+
+1. Ainda em **Storage**, clique em **Create Database** (ou **Blob**, dependendo
+   de como aparecer) e escolha **Blob**.
+2. Conecte ao projeto `imoveis`.
+3. Isso preenche automaticamente a variável `BLOB_READ_WRITE_TOKEN` — também
+   não precisa copiar nada na mão.
 
 ### 4. Configurar as variáveis de ambiente
 Em **Settings → Environment Variables**, adicione:
@@ -84,11 +97,12 @@ Vercel com o KV conectado é necessário.
 - Cada novo book processado **substitui** o catálogo anterior. Se quiser
   manter histórico de books antigos, copie o JSON exibido na tela antes
   de subir um novo.
-- Books muito grandes (50+ páginas) podem demorar bastante ou esbarrar no
-  limite de tempo de execução da Vercel no plano gratuito (o código já
-  está configurado para o máximo permitido, 300 segundos, mas o plano
-  Hobby da Vercel tem um teto de tempo de execução menor — se isso for um
-  problema no seu uso, pode ser necessário o plano Pro).
+- **Plano gratuito (Hobby) da Vercel: teto de 60 segundos por processamento.**
+  Se o book tiver muitas páginas, o processamento pode não terminar a
+  tempo e retornar erro, mesmo com o upload funcionando normalmente.
+  Se isso acontecer com frequência, as opções são: dividir o book em
+  arquivos menores antes de enviar, ou migrar para o plano Pro da Vercel
+  (que permite até 800 segundos por execução).
 - A extração é feita por IA e pode ocasionalmente errar ou deixar de
   identificar algum imóvel — vale conferir o JSON gerado antes de confiar
   cegamente nele.
