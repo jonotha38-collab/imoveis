@@ -26,7 +26,7 @@ export async function POST(request) {
           // Usamos o Blob PUBLICO (o Private nao funciona com upload direto do navegador).
           // O token vem da variavel com o prefixo customizado, para nao conflitar
           // com um eventual store Private que ainda esteja conectado ao projeto.
-          token: process.env.PUBLICO_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN
+          token: process.env.PUBLICO_READ_WRITE_TOKEN || process.env.PUBLICO_READ_WRITE_TOKEN
         };
       },
       onUploadCompleted: async () => {
