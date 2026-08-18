@@ -22,7 +22,11 @@ export async function POST(request) {
 
         return {
           allowedContentTypes: ['application/pdf'],
-          maximumSizeInBytes: 80 * 1024 * 1024 // 80MB de folga para books grandes
+          maximumSizeInBytes: 80 * 1024 * 1024, // 80MB de folga para books grandes
+          // Usamos o Blob PUBLICO (o Private nao funciona com upload direto do navegador).
+          // O token vem da variavel com o prefixo customizado, para nao conflitar
+          // com um eventual store Private que ainda esteja conectado ao projeto.
+          token: process.env.PUBLICO_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN
         };
       },
       onUploadCompleted: async () => {
@@ -33,6 +37,7 @@ export async function POST(request) {
 
     return NextResponse.json(jsonResponse);
   } catch (erro) {
-    return NextResponse.json({ error: erro.message }, { status: 400 });
+    console.error('Erro na rota /api/upload:', erro);
+    return NextResponse.json({ error: erro.message || String(erro) }, { status: 400 });
   }
 }
