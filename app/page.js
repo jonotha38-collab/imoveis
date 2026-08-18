@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { upload } from '@vercel/blob/client';
 
 export default function Home() {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | processing | done | error
+  const [status, setStatus] = useState('idle'); // idle | uploading | processing | done | error
   const [message, setMessage] = useState('');
   const [result, setResult] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -35,18 +36,28 @@ export default function Home() {
 
   async function handleSubmit() {
     if (!file) return;
-    setStatus('processing');
-    setMessage('Lendo o book e extraindo as informações de cada página…');
     setResult(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('password', password);
+      // 1) Envia o arquivo direto para o Vercel Blob (sem passar pelo limite
+      // de 4.5MB da nossa funcao serverless)
+      setStatus('uploading');
+      setMessage('Enviando o arquivo…');
+
+      const blob = await upload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+        clientPayload: JSON.stringify({ password })
+      });
+
+      // 2) Pede para o servidor processar o arquivo que ja esta no Blob
+      setStatus('processing');
+      setMessage('Lendo o book e extraindo as informações de cada página…');
 
       const res = await fetch('/api/process', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: blob.url, password })
       });
 
       const data = await res.json();
@@ -62,7 +73,7 @@ export default function Home() {
       setMessage(`Pronto! ${data.catalogo?.imoveis?.length ?? 0} imóvel(is) identificado(s) e publicado(s).`);
     } catch (err) {
       setStatus('error');
-      setMessage('Erro de conexão ao enviar o arquivo. Tente novamente.');
+      setMessage(err?.message || 'Erro de conexão ao enviar o arquivo. Tente novamente.');
     }
   }
 
@@ -124,8 +135,16 @@ export default function Home() {
         </div>
 
         <div className="actions">
-          <button className="btn" onClick={handleSubmit} disabled={!file || status === 'processing'}>
-            {status === 'processing' ? 'Processando…' : 'Processar book'}
+          <button
+            className="btn"
+            onClick={handleSubmit}
+            disabled={!file || status === 'uploading' || status === 'processing'}
+          >
+            {status === 'uploading'
+              ? 'Enviando…'
+              : status === 'processing'
+              ? 'Processando…'
+              : 'Processar book'}
           </button>
           {message && (
             <span className={`status ${status === 'error' ? 'err' : status === 'done' ? 'ok' : ''}`}>
@@ -134,7 +153,7 @@ export default function Home() {
           )}
         </div>
 
-        {status === 'processing' && (
+        {(status === 'uploading' || status === 'processing') && (
           <div className="scan-track">
             <div className="scan-bar" />
           </div>
