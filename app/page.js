@@ -177,9 +177,16 @@ export default function Home() {
       </div>
 
       <p className="footnote">
-        Cada novo book processado <strong>substitui</strong> o catálogo anterior nessa URL. Se
-        quiser manter o histórico de books antigos, salve o JSON exibido acima antes de subir um
-        novo.
+        Cada novo book processado <strong>substitui</strong> os imóveis vindos de PDF anteriores
+        (mas preserva os cadastrados manualmente). Se quiser manter o histórico de books antigos,
+        salve o JSON exibido acima antes de subir um novo.
+      </p>
+
+      <p className="footnote">
+        Prefere cadastrar um imóvel sem PDF?{' '}
+        <a href="/manual" style={{ color: 'var(--cyan)' }}>
+          Ir para o cadastro manual →
+        </a>
       </p>
     </main>
   );
