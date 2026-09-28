@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  :focus-visible { outline: 2px solid #ff6600; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50; }
+  .btn-primary { @apply btn bg-mva-orange text-white hover:bg-mva-orangeHover; }
+  .btn-dark { @apply btn bg-mva-blue text-white hover:bg-navy-800; }
+  .btn-ghost { @apply btn border border-navy-200 text-navy-700 hover:bg-navy-100; }
+  .input { @apply w-full rounded-lg border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 placeholder:text-navy-400 focus:border-mva-orange focus:outline-none focus:ring-2 focus:ring-mva-orange/20; }
+  .label { @apply mb-1.5 block text-sm font-medium text-navy-700; }
+}
+
+@layer utilities {
+  @keyframes scaleUp { from { opacity: 0; transform: scale(.96) } to { opacity: 1; transform: none } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(16px) } to { opacity: 1; transform: none } }
+  .animate-scaleUp { animation: scaleUp .18s ease-out }
+  .animate-slideIn { animation: slideIn .22s ease-out }
+}
+@media print { .no-print { display: none !important } }
+body { font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; }
+
+/* ---------- Responsivo e acabamento ---------- */
+html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+body { background: #f8fafc; overflow-x: hidden; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; }
+button, [role="tab"] { touch-action: manipulation; }
+select { text-overflow: ellipsis; }
+
+@layer components {
+  /* Modais: janela deslizante no celular, cartão centralizado no desktop */
+  .fixed.inset-0.z-50 { overscroll-behavior: contain; }
+}
+
+@media (max-width: 639px) {
+  /* 16px evita o zoom automático do iPhone ao tocar em um campo */
+  input, select, textarea { font-size: 16px !important; }
+  .text-xs { font-size: 0.8125rem; line-height: 1.25rem; }
+  .text-\[11px\] { font-size: 0.75rem; }
+  .text-\[10px\] { font-size: 0.6875rem; }
+
+  .fixed.inset-0.z-50 { align-items: flex-end !important; padding: 0 !important; }
+  .fixed.inset-0.z-50 > div {
+    width: 100% !important; max-width: none !important; max-height: 92dvh; overflow-y: auto;
+    margin: 0 !important; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 1.5rem !important; border-top-right-radius: 1.5rem !important;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (pointer: coarse) {
+  select, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) { min-height: 44px; }
+}
